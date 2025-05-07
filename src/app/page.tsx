@@ -6,25 +6,31 @@ import { useRouter } from "next/navigation";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "@/hooks/useAuth";
+import Link from "next/link";
 
 export default function SignInPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
+  const [error, setError] = useState("");
 
   // ใช้ hook useAuth แทนการเขียนตรรกะการ login เอง
-  const { signIn, isLoading, error } = useAuth();
+  const { signIn, isLoading, error: authError } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
-    // เรียกใช้ฟังก์ชัน signIn จาก hook
-    const success = await signIn(username);
+    try {
+      // เรียกใช้ฟังก์ชัน signIn จาก hook
+      const success = await signIn(username);
 
-    // ถ้าสำเร็จให้ redirect ไปหน้า dashboard หลังจากผ่านไป 1.5 วินาที
-    if (success) {
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 1500);
+      if (success) {
+        setTimeout(() => {
+          router.push("/blog");
+        }, 100);
+      }
+    } catch (error) {
+      setError("เซิร์ฟเวอร์ไม่ตอบสนอง โปรดลองอีกครั้งในภายหลัง");
     }
   };
 
@@ -72,9 +78,9 @@ export default function SignInPage() {
             <h1 className="text-white text-2xl font-bold mb-8">Sign in</h1>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
-              {error && (
+              {(error || authError) && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                  {error}
+                  {error || authError}
                 </div>
               )}
               <div>
@@ -139,9 +145,9 @@ export default function SignInPage() {
               </h1>
 
               <form className="space-y-4" onSubmit={handleSubmit}>
-                {error && (
+                {(error || authError) && (
                   <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                    {error}
+                    {error || authError}
                   </div>
                 )}
                 <div>
