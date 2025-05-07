@@ -1,9 +1,81 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function SignInPage() {
+  const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    if (!username.trim()) {
+      setError("กรุณากรอกชื่อผู้ใช้");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3001/auth/signin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username }),
+      });
+
+      const data = await response.json();
+
+      if (data.status === "success") {
+        // แสดง Toast notification เมื่อเข้าสู่ระบบสำเร็จ
+        toast.success("เข้าสู่ระบบสำเร็จ");
+
+        // บันทึกข้อมูลลงใน localStorage
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        // หน่วงเวลาเล็กน้อยเพื่อให้ผู้ใช้เห็น Toast notification
+        setTimeout(() => {
+          // redirect ไปหน้า dashboard
+          router.push("/dashboard");
+        }, 1500);
+      } else {
+        // แสดง Toast notification เมื่อมีข้อผิดพลาด
+        toast.error(data.message);
+        setError(data.message);
+      }
+    } catch (err) {
+      const errorMessage = "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์";
+      toast.error(errorMessage);
+      setError(errorMessage);
+      console.error("Error during login:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen w-full relative">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+
       {/* Mobile View Layout */}
       <div className="md:hidden w-full min-h-screen relative flex flex-col">
         {/* พื้นหลังเต็มจอสีเขียวเข้ม */}
@@ -32,19 +104,33 @@ export default function SignInPage() {
           <div className="w-full max-w-md">
             <h1 className="text-white text-2xl font-bold mb-8">Sign in</h1>
 
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                  {error}
+                </div>
+              )}
               <div>
                 <input
                   type="text"
                   placeholder="Username"
                   className="w-full p-3 rounded-md border bg-white text-gray-600 border-gray-300 focus:outline-none"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={isLoading}
                 />
+                <p className="text-xs text-white mt-1 ml-1">
+                  ลองใช้: datawow, userwow, หรือ adminwow
+                </p>
               </div>
               <button
                 type="submit"
-                className="w-full bg-success text-white p-3 rounded-md hover:bg-opacity-90 transition"
+                className={`w-full ${
+                  isLoading ? "bg-gray-400" : "bg-success"
+                } text-white p-3 rounded-md hover:bg-opacity-90 transition`}
+                disabled={isLoading}
               >
-                Sign In
+                {isLoading ? "กำลังดำเนินการ..." : "Sign In"}
               </button>
             </form>
           </div>
@@ -85,19 +171,33 @@ export default function SignInPage() {
                 Sign in
               </h1>
 
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleSubmit}>
+                {error && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    {error}
+                  </div>
+                )}
                 <div>
                   <input
                     type="text"
                     placeholder="Username"
                     className="w-full p-3 rounded-md border bg-white text-gray-600 border-gray-300 focus:outline-none"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    disabled={isLoading}
                   />
+                  <p className="text-xs text-white mt-1 ml-1">
+                    ลองใช้: datawow, userwow, หรือ adminwow
+                  </p>
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-success text-white p-3 rounded-md hover:bg-opacity-90 transition"
+                  className={`w-full ${
+                    isLoading ? "bg-gray-400" : "bg-success"
+                  } text-white p-3 rounded-md hover:bg-opacity-90 transition`}
+                  disabled={isLoading}
                 >
-                  Sign In
+                  {isLoading ? "กำลังดำเนินการ..." : "Sign In"}
                 </button>
               </form>
             </div>
