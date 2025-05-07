@@ -1,53 +1,29 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-
-interface User {
-  username: string;
-}
+import React, { useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Dashboard() {
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // ใช้ hook useAuth จัดการเรื่องผู้ใช้และการตรวจสอบสถานะ
+  const { user, isLoading, signOut, requireAuth, API_URL } = useAuth();
 
+  // เรียกใช้ requireAuth เพื่อตรวจสอบและ redirect ถ้าไม่ได้ล็อกอินไว้
   useEffect(() => {
-    // ตรวจสอบว่ามีข้อมูลผู้ใช้ที่ล็อกอินไว้หรือไม่
-    const userData = localStorage.getItem("user");
+    requireAuth("/");
+  }, [requireAuth]);
 
-    if (!userData) {
-      // ถ้าไม่มีข้อมูลผู้ใช้ ให้ redirect กลับไปหน้า login
-      router.replace("/");
-      return;
-    }
-
-    try {
-      // แปลงข้อมูลจาก JSON string เป็น object
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-    } catch (error) {
-      console.error("Error parsing user data:", error);
-      // ถ้ามีปัญหาในการแปลงข้อมูล ให้ redirect กลับไปหน้า login
-      router.replace("/");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [router]);
-
-  const handleLogout = () => {
-    // ลบข้อมูลผู้ใช้จาก localStorage
-    localStorage.removeItem("user");
-    // redirect กลับไปหน้า login
-    router.push("/");
-  };
-
+  // แสดงส่วน loading
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-green-500">
         <div className="text-white text-xl">กำลังโหลด...</div>
       </div>
     );
+  }
+
+  // ถ้าไม่มีข้อมูลผู้ใช้ (กรณีกำลัง redirect) ให้แสดงหน้าว่าง
+  if (!user) {
+    return null;
   }
 
   return (
@@ -58,11 +34,11 @@ export default function Dashboard() {
             <h1 className="text-2xl font-bold mr-4">a Board</h1>
             <p>
               ยินดีต้อนรับ,{" "}
-              <span className="font-semibold">{user?.username}</span>
+              <span className="font-semibold">{user.username}</span>
             </p>
           </div>
           <button
-            onClick={handleLogout}
+            onClick={signOut}
             className="bg-white text-green-500 px-4 py-2 rounded-md hover:bg-gray-100 transition"
           >
             ออกจากระบบ
@@ -75,11 +51,12 @@ export default function Dashboard() {
           <h2 className="text-xl font-bold mb-4 text-green-500">แดชบอร์ด</h2>
           <p className="text-gray-700">
             คุณได้เข้าสู่ระบบด้วยชื่อผู้ใช้:{" "}
-            <span className="font-semibold">{user?.username}</span>
+            <span className="font-semibold">{user.username}</span>
           </p>
           <p className="mt-4 text-gray-600">
             นี่เป็นหน้าแดชบอร์ดพื้นฐานสำหรับผู้ใช้ที่ล็อกอินสำเร็จ
           </p>
+          <p className="mt-2 text-sm text-gray-500">API URL: {API_URL}</p>
         </div>
       </main>
     </div>

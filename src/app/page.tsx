@@ -3,61 +3,28 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SignInPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+
+  // ใช้ hook useAuth แทนการเขียนตรรกะการ login เอง
+  const { signIn, isLoading, error } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setIsLoading(true);
 
-    if (!username.trim()) {
-      setError("กรุณากรอกชื่อผู้ใช้");
-      setIsLoading(false);
-      return;
-    }
+    // เรียกใช้ฟังก์ชัน signIn จาก hook
+    const success = await signIn(username);
 
-    try {
-      const response = await fetch("http://localhost:3001/auth/signin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username }),
-      });
-
-      const data = await response.json();
-
-      if (data.status === "success") {
-        // แสดง Toast notification เมื่อเข้าสู่ระบบสำเร็จ
-        toast.success("เข้าสู่ระบบสำเร็จ");
-
-        // บันทึกข้อมูลลงใน localStorage
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        // หน่วงเวลาเล็กน้อยเพื่อให้ผู้ใช้เห็น Toast notification
-        setTimeout(() => {
-          // redirect ไปหน้า dashboard
-          router.push("/dashboard");
-        }, 1500);
-      } else {
-        // แสดง Toast notification เมื่อมีข้อผิดพลาด
-        toast.error(data.message);
-        setError(data.message);
-      }
-    } catch (err) {
-      const errorMessage = "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์";
-      toast.error(errorMessage);
-      setError(errorMessage);
-      console.error("Error during login:", err);
-    } finally {
-      setIsLoading(false);
+    // ถ้าสำเร็จให้ redirect ไปหน้า dashboard หลังจากผ่านไป 1.5 วินาที
+    if (success) {
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1500);
     }
   };
 
