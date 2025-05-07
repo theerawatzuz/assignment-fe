@@ -26,7 +26,7 @@ export default function SignInPage() {
 
       if (success) {
         setTimeout(() => {
-          router.push("/blog");
+          router.push("/home");
         }, 100);
       }
     } catch (error) {
