@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Castoro } from "next/font/google";
 import "./globals.css";
+import LayoutTemplate from "../components/LayoutTemplate";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -27,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${castoro.variable} antialiased`}>
-        {children}
+        <LayoutTemplate>{children}</LayoutTemplate>
       </body>
     </html>
   );

@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import Navbar from "@/components/Navbar";
-import Sidebar from "@/components/Sidebar";
 import BlogCard from "@/components/BlogCard";
 
 // ข้อมูลตัวอย่าง - บทความจากผู้เขียนของเว็บไซต์
@@ -47,20 +45,16 @@ const officialBlogPosts = [
 
 export default function BlogPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-green-500">Our Blog</h1>
+        <p className="text-gray-600 mt-2">
+          Official updates, announcements, and articles from our team
+        </p>
+      </div>
 
       <div className="flex">
-        <Sidebar />
-
-        <main className="flex-1 max-w-3xl mx-auto px-4 py-6">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-green-500">Our Blog</h1>
-            <p className="text-gray-600 mt-2">
-              Official updates, announcements, and articles from our team
-            </p>
-          </div>
-
+        <div className="flex-1 max-w-3xl">
           <div className="bg-white rounded-lg shadow-sm">
             {officialBlogPosts.map((post) => (
               <BlogCard
@@ -74,10 +68,10 @@ export default function BlogPage() {
               />
             ))}
           </div>
-        </main>
+        </div>
 
         {/* Right sidebar with featured content */}
-        <div className="hidden lg:block w-64 p-4">
+        <div className="hidden lg:block w-64 ml-6">
           <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
             <h2 className="font-bold text-lg mb-4">Subscribe</h2>
             <p className="text-sm text-gray-600 mb-4">
